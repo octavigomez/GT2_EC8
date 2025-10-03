@@ -1,0 +1,57 @@
+import numpy as np
+
+class ScalingLawCalculator:
+    def __init__(self, SRL):
+        self.SRL = SRL
+
+    def WellsAndCoppersmith94(self, kinematics):
+        if kinematics == "N":
+            a, b, sd = 4.86, 1.32, 0.34
+        elif kinematics == "R":
+            a, b, sd = 5.0, 1.22, 0.28
+        elif kinematics == "SS":
+            a, b, sd = 5.16, 1.12, 0.28
+        elif kinematics == "All":
+            a, b, sd = 5.08, 1.16, 0.28
+        M = a + b * np.log10(self.SRL/1e3)
+        return M, sd
+
+    def Leonard2010(self, kinematics):
+        if (kinematics == "N") | (kinematics == "R"):
+            a, b, sd_b = 2.5, 7.96, [7.53, 8.51]
+        elif kinematics == "SS":
+            a, b, sd_b = 2.5, 7.85, [7.41, 8.28]
+        elif kinematics == "SCR":
+            a, b, sd_b = 2.5, 8.08, [7.87, 8.28]
+        RLD = 10 ** ((np.log10(self.SRL) + 0.275) / 1.1)
+        logM0 = a * np.log10(RLD) + b
+        M = 2/3*logM0-6.07
+        sd_b_fixed = (sd_b[1]-sd_b[0])/2
+        sd = (2/3)*sd_b_fixed
+        return M, sd
+
+    def Thingbaijam2017(self, kinematics):
+        if kinematics == "N":
+            a, b, sd_a, sd_b, sd_logL = -1.722, 0.485, 0.260, 0.036, 0.128
+        elif kinematics == "R":
+            a, b, sd_a, sd_b, sd_logL = -2.693, 0.614, 0.292, 0.043, 0.083
+        elif kinematics == "SS":
+            a, b, sd_a, sd_b, sd_logL = -2.943, 0.681, 0.357, 0.052, 0.151
+        elif kinematics == "subduction":
+            a, b, sd_a, sd_b, sd_logL = -2.412, 0.583, 0.288, 0.037, 0.107
+        M = (np.log10(self.SRL/1e3)-a)/b
+        sd = sd_logL/b
+        return M, sd
+
+    def Brengman2019(self, kinematics):
+        if kinematics == "N":
+            a, b, sd_a, sd_b = 3.9568, 1.7917, 0.6761, 0.5074
+        elif kinematics == "R":
+            a, b, sd_a, sd_b = 4.2067, 1.7219, 0.3281, 0.1833
+        elif kinematics == "SS":
+            a, b, sd_a, sd_b = 4.8263, 1.2874, 0.5101, 0.3351
+        elif kinematics == "All":
+            a, b, sd_a, sd_b = 4.2089, 1.9771, 0.2873, 0.2058
+        M = a + b * np.log10(self.SRL/1e3)
+        sd = np.sqrt((sd_a)**2 + (np.log10(self.SRL/1e3)*sd_b)**2)
+        return M, sd
