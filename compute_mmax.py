@@ -30,7 +30,7 @@ for srl in range(len(SRL)):
     kinematics = kin[srl]
     SRL_sample = np.linspace(SRL[srl] - SRL_sd[srl] * 2, SRL[srl] + SRL_sd[srl] * 2, num_samples)
     normal_srl = normals_srl(SRL[srl], SRL_sd[srl], SRL_sample)
-    random_srl = randoms_srl(SRL_sample, normal_srl, num_samples=1000)
+    random_srl = randoms_srl(SRL_sample, normal_srl, num_samples=num_samples)
 
     #Random sampling figure
     outputs_dir = os.makedirs("Results/"+Faults[srl], exist_ok=True)
