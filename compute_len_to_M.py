@@ -11,12 +11,13 @@ from matplotlib import pyplot as plt
 ## ======================================================================
 
 min_SRL = 5000
-max_SRL = 100000
+max_SRL = 55000
 step = 500
 SRL = np.arange(min_SRL, max_SRL+step, step)
 SRL_sd = np.zeros(len(SRL))
 kin = ["N", "R", "SS", "All","SCR"]
 table = np.empty((len(kin), 2), dtype=object)
+os.makedirs("Results", exist_ok=True)
 
 ## ======================================================================
 # Define scaling relations to use
@@ -65,7 +66,7 @@ for k in range(len(kin)):
 # Random sampling of magnitude values within the Mw+sd range for a better uncertainty exploration
 ## ===============================================================================================
     fig, ax = plt.subplots()
-    samples = 1000
+    samples = 10000
     matrix_M = np.empty((int(len(SRL)), samples*mult))
     M_range = np.linspace(4, 9, 1000)
     SRL_all = list(SRL)*mult
@@ -81,20 +82,28 @@ for k in range(len(kin)):
         filter_samples[(filter_samples < Mw[m] - sd[m]) | (filter_samples > Mw[m] + sd[m])] = np.nan
         matrix_M[row, pos: pos+ samples] = filter_samples
     for j in range(len(SRL)):
-        perc = np.nanpercentile(matrix_M[j,:], 80)
+        quantile = 80
+        perc = np.nanpercentile(matrix_M[j,:], quantile)
         percentiles.append(perc)
-        plt.scatter(np.zeros(len(matrix_M[j,:])) + SRL[j], matrix_M[j, :], s=.001, c="grey")
+        #plt.scatter(np.zeros(len(matrix_M[j,:])) + SRL[j], matrix_M[j, :], s=.001, c="grey")
+        plt.boxplot(matrix_M[j, ~np.isnan(matrix_M[j, :])], positions=[float(SRL[j])],
+                    widths=500, showfliers=False)
     percentiles = [float(x) for x in percentiles]
-    plt.scatter(SRL, percentiles, c="red", s=4)
-    loc_perc = np.where(np.array(percentiles)>=6.5)[0][0]
-    plt.plot( [SRL[loc_perc], SRL[loc_perc]], [min(M_range), 6.5], c="black")
-    plt.plot( [0, SRL[loc_perc]], [6.5,6.5], c="black")
-    plt.text(SRL[loc_perc], 4.5, "  SRL threshold: "+str(round(SRL[loc_perc]/1e3))+"km", horizontalalignment="left")
-    plt.xlim(min(SRL), max(SRL))
+    loc_perc = np.where(np.array(percentiles) >= 6.5)[0][0]
+    plt.scatter(SRL, percentiles, c="red", s=8, label = "Q"+str(quantile))
+    plt.plot( [SRL[loc_perc], SRL[loc_perc]], [min(M_range), 6.5], c="blue")
+    plt.plot( [0, SRL[loc_perc]], [6.5,6.5], c="blue")
+    plt.text(SRL[loc_perc], 4.5, "  SRL threshold="+str(round(SRL[loc_perc]/1e3))+"km",
+             horizontalalignment="left", color="blue")
     plt.ylim(min(M_range), max(M_range))
+    plt.xticks(ticks = np.arange(min(SRL), max(SRL)+10000, 10000))
+    ax.set_xticklabels(f"{x/1000:.0f}" for x in np.arange(min(SRL), max(SRL)+10000, 10000))
+    plt.xlim(min(SRL), max(SRL))
     plt.ylabel("Mw")
-    plt.xlabel("SRL (m)")
-    plt.title("SRL threshold for "+kin[k] + " kinematics")
+    plt.xlabel("SRL (km)")
+    plt.title("SRL threshold for type "+kin[k])
+    plt.grid("on", which="major", linestyle=":")
+    plt.legend()
     fig.show()
     fig.savefig("Results/SRL_threshold_" + kin[k] + ".pdf")
 
@@ -105,6 +114,5 @@ for k in range(len(kin)):
 # Export files of the analysis
 ## ===============================================================================================
 
-os.makedirs("Results", exist_ok=True)
 df = pd.DataFrame(table, columns=["Kinematics", "SRL(m) - perc. 80%"])
 pd.DataFrame(df).to_csv("Results/SRL_threshold.csv", index=False)
