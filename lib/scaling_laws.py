@@ -89,7 +89,7 @@ class ScalingLawCalculator:
         M = a + b * np.log10(self.SRL/1e3)
         return M, sd
 
-    ## I think the next regression is not orthogonal
+    ## !!! I think the next regression is not orthogonal !!!
 
     # def MaiAndBeroza2000(self, kinematics): # Considering effective dimensions
     #     if (kinematics == "N") | (kinematics == "R"):
