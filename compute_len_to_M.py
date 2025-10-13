@@ -23,7 +23,7 @@ os.makedirs("Results", exist_ok=True)
 # Define scaling relations to use
 ## ======================================================================
 
-methods = ["WellsAndCoppersmith94","Leonard2010", "Thingbaijam2017", "Brengman2019"]
+methods = ["WellsAndCoppersmith94","Leonard2010", "Thingbaijam2017", "Brengman2019", "Blaser2010", "Wesnousky2008"] #,Ambraseys1998]
 
 ## ==================================================================================
 # Compute pool of magnitudes and standard deviations from the different scaling laws
@@ -53,7 +53,7 @@ for k in range(len(kin)):
             array_Mw.append([Mw_list])
             array_sd.append([sd_list])
         elif kinematics in ["All"]:
-            methods = ["WellsAndCoppersmith94","Brengman2019"]
+            methods = ["WellsAndCoppersmith94","Brengman2019", "Blaser2010", "Wesnousky2008"] #,"Ambraseys1998"]
             mult = len(methods)
             results = [getattr(scaling, m)(kinematics) for m in methods]
             Mw_list, sd_list = zip(*results)
