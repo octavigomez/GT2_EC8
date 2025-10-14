@@ -21,7 +21,7 @@ table = np.empty((len(SRL), 6), dtype=object)
 # Define scaling relations to use
 ## ======================================================================
 
-methods = ["WellsAndCoppersmith94","Leonard2010", "Thingbaijam2017", "Brengman2019"]
+methods = ["WellsAndCoppersmith94","Leonard2010", "Thingbaijam2017", "Brengman2019", "Blaser2010", "Wesnousky2008"] #,Ambraseys1998]
 
 ## ======================================================================
 # Sample SRL values from the SRL probability distribution
@@ -35,15 +35,15 @@ for srl in range(len(SRL)):
     #Random sampling figure
     outputs_dir = os.makedirs("Results/"+Faults[srl], exist_ok=True)
     path_out = "Results/"+Faults[srl]
-    fig1, ax = plt.subplots()
-    plt.plot(SRL_sample, normal_srl, c="red", label="Normal SRL distribution")
-    plt.scatter(random_srl, np.zeros(len(random_srl)), marker="x", label="Random SRL samples")
-    plt.legend()
-    plt.xlabel("SRL (m)")
-    plt.ylabel("Probability density")
-    plt.title("Random sampling from SRL distribution \n Nsamples = " + str(num_samples) + "\n "+ Faults[srl])
-    plt.tight_layout()
-    plt.show()
+    # fig1, ax = plt.subplots()
+    # plt.plot(SRL_sample, normal_srl, c="red", label="Normal SRL distribution")
+    # plt.scatter(random_srl, np.zeros(len(random_srl)), marker="x", label="Random SRL samples")
+    # plt.legend()
+    # plt.xlabel("SRL (m)")
+    # plt.ylabel("Probability density")
+    # plt.title("Random sampling from SRL distribution \n Nsamples = " + str(num_samples) + "\n "+ Faults[srl])
+    # plt.tight_layout()
+    # plt.show()
 
     ## ==================================================================================
     # Compute pool of magnitudes and standard deviations from the different scaling laws
@@ -53,19 +53,29 @@ for srl in range(len(SRL)):
     array_sd = []
     for i in range(len(random_srl)):
         scaling = ScalingLawCalculator(random_srl[i])
-        if kinematics not in ["SCR", "subduction"]:
+        if kinematics not in ["SCR", "subduction", "All"]:
+            mult = len(methods)
             results = [getattr(scaling, m)(kinematics) for m in methods]
             Mw_list, sd_list = zip(*results)
             array_Mw.append(list(Mw_list))
             array_sd.append(list(sd_list))
         elif kinematics in ["SCR"]:
+            mult = 1
             Mw_list, sd_list = scaling.Leonard2010(kinematics)
             array_Mw.append([Mw_list])
             array_sd.append([sd_list])
         elif kinematics in ["subduction"]:
+            mult = 1
             Mw_list, sd_list = scaling.Thingbaijam2017(kinematics)
             array_Mw.append([Mw_list])
             array_sd.append([sd_list])
+        elif kinematics in ["All"]:
+            methods = ["WellsAndCoppersmith94","Brengman2019", "Blaser2010", "Wesnousky2008"] #,"Ambraseys1998"]
+            mult = len(methods)
+            results = [getattr(scaling, m)(kinematics) for m in methods]
+            Mw_list, sd_list = zip(*results)
+            array_Mw.append(list(Mw_list))
+            array_sd.append(list(sd_list))
     Mw = np.array([float(i) for list in array_Mw for i in list])
     sd = np.array([float(i) for list in array_sd for i in list])
 
@@ -115,7 +125,7 @@ for srl in range(len(SRL)):
     ## ======================================================================
 
     M_cdf = np.cumsum(p)
-    threshold = 0.159 # 15% of the distribution
+    threshold = 0.8 # 15% of the distribution
     thr = np.interp(threshold, M_cdf, M_range)
 
     #Plot
@@ -145,7 +155,7 @@ for srl in range(len(SRL)):
     table[srl,4] = sd_stat
     table[srl,5] = thr
 
-    fig1.savefig(path_out + "/Random_sampling.png")
+    #fig1.savefig(path_out + "/Random_sampling.png")
     fig2.savefig(path_out + "/Magnitude_PDF.png")
     fig3.savefig(path_out+ "/Quantile_analysis.png")
 
