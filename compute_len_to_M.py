@@ -10,7 +10,7 @@ from matplotlib import pyplot as plt
 # Define SRL exploration values
 ## ======================================================================
 
-min_SRL = 5000
+min_SRL = 1000
 max_SRL = 55000
 step = 500
 SRL = np.arange(min_SRL, max_SRL+step, step)
