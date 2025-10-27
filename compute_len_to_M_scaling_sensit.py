@@ -78,8 +78,15 @@ for k in range(len(kin)):
             M_pdf = normal_m(Mw[m], sd[m], M_range)
             random_M = randoms_srl(M_range, M_pdf, samples)
             filter_samples = random_M
-            filter_samples[(filter_samples < Mw[m] - sd[m]) | (filter_samples > Mw[m] + sd[m])] = np.nan
+            filter_samples[(filter_samples < Mw[m] - sd[m]*3) | (filter_samples > Mw[m] + sd[m]*3)] = np.nan
             matrix_M[row, pos: pos+ samples] = filter_samples
+        #     plt.plot(M_range, M_pdf, color="red")
+        #     # plt.scatter(filter_samples, filter_samples*0, c="blue", marker="x", s= 2, label="Samples")
+        #     plt.xlabel("Mw")
+        #     plt.ylabel("Probability")
+        #     plt.xlim(4, 8.5)
+        #     # plt.legend()
+        # plt.show()
         for j in range(len(SRL)):
             quantile = 80
             perc = np.nanpercentile(matrix_M[j,:], quantile)
