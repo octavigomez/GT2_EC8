@@ -12,7 +12,7 @@ from matplotlib import pyplot as plt
 
 min_SRL = 1000
 max_SRL = 55000
-step = 500
+step = 100
 SRL = np.arange(min_SRL, max_SRL+step, step)
 SRL_sd = np.zeros(len(SRL))
 kin = ["N", "R", "SS", "All","SCR"]
